@@ -71,6 +71,7 @@ const BASE = {
   notificationsEnabled: true,
   eventsRefreshSec: { balance: 1800, whisper: 300 },
   workStatusTexts: [['在干活']],
+  actionSounds: { 点击: 'click.wav' },
 };
 
 /** 与 BASE.animations 同构、仅替换 events 的用户层 animations（顶层字段整段替换，故必须完整） */
@@ -1469,5 +1470,46 @@ describe('removeRoundsByTs —— 按轮删除（一轮两条共享 ts，成对�
     const r = removeRoundsByTs(msgs, [1000, 2000]);
     assert.deepEqual(r.messages, []);
     assert.equal(r.removed, 4);
+  });
+});
+
+describe('readAllConfig —— actionSounds 动作音效表（动画名 → 音效文件名）', () => {
+  /** 用户层只写 actionSounds，返回合并后 main 条目的那一份 */
+  function mergedActionSounds(actionSounds: unknown): unknown {
+    const { paths, dir } = pathsWithUser(JSON.stringify({ actionSounds }));
+    try {
+      return readAllConfig(paths).main.actionSounds;
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  test('合法映射整段取用户层；空对象 = 全部静音', () => {
+    const own = { 点击: 'happy.mp3', 拖拽: '拎起 音效.ogg', 睡觉: 'snore.WAV' };
+    assert.deepEqual(mergedActionSounds(own), own);
+    assert.deepEqual(mergedActionSounds({}), {});
+  });
+
+  test('非法形态整段回退内置默认（数组 / 非字符串值 / 空文件名）', () => {
+    for (const bad of [['click.wav'], { 点击: 1 }, { 点击: '' }, 'click.wav', null]) {
+      assert.deepEqual(mergedActionSounds(bad), BASE.actionSounds, JSON.stringify(bad));
+    }
+  });
+
+  test('文件名不得当路径用：含分隔符或「..」一律整段回退', () => {
+    for (const file of ['../config.jsonc', 'sub/a.wav', 'sub\\a.wav', '..', 'C:a.wav']) {
+      assert.deepEqual(mergedActionSounds({ 点击: file }), BASE.actionSounds, file);
+    }
+  });
+
+  test('只认浏览器能直接播的音频扩展名', () => {
+    for (const file of ['click', 'click.webm', 'click.jsonc', 'click.wav.exe']) {
+      assert.deepEqual(mergedActionSounds({ 点击: file }), BASE.actionSounds, file);
+    }
+  });
+
+  test('设置页保存不抹掉手写的 actionSounds（透传保留）', () => {
+    const own = { 点击: 'happy.mp3' };
+    assert.deepEqual(saveOnce({ pets: PETS }, { pets: PETS, actionSounds: own })?.actionSounds, own);
   });
 });

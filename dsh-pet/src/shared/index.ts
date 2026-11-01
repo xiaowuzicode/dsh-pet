@@ -30,3 +30,4 @@ export * from './sleep-hotkey.ts';
 export * from './todo/index.ts';
 export * from './tooltip.ts';
 export * from './voice.ts';
+export * from './action-sound.ts';

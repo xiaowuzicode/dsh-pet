@@ -2496,8 +2496,8 @@ paths:
     get:
       tags: [Assets]
       operationId: getSound
-      summary: 获取点击音效文件
-      description: 从包内 `assets/sound/` 读取（扁平结构，**没有** petId 段）；当前只有 `click-duck.wav`。
+      summary: 获取音效文件（点击音效 + 动作音效）
+      description: 依次从用户 `$DSH_HOME/dsh-pet/sound/`、包内 `assets/sound/` 查找（扁平结构，**没有** petId 段）；同名时用户目录优先。
       parameters:
         - $ref: "#/components/parameters/AssetFile"
       responses:
