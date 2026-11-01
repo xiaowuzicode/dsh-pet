@@ -225,6 +225,7 @@ describe('buildSaveBody —— 请求体字段', () => {
       pets: [],
       notificationsEnabled: true,
       clickSoundEnabled: false,
+      actionSoundsEnabled: true,
       whisperImageEnabled: false,
       chatImageEnabled: false,
       chatAnimationEnabled: false,
@@ -241,6 +242,7 @@ describe('buildSaveBody —— 请求体字段', () => {
       animationWeights: { idle: 10, turn: 5, move: 5 },
     } as unknown as SaveFields;
     assert.deepEqual(Object.keys(buildSaveBody(fields)).sort(), [
+      'actionSoundsEnabled',
       'animationWeights',
       'chatAnimationEnabled',
       'chatImageEnabled',
